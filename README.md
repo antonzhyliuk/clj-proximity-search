@@ -5,22 +5,38 @@ This challenge is about determining if a text matches a given query.
 
 ## Query
 
-The data structure for a query consists of two types of tokens: Operators and Words.
+The data structure for a query consists of two types of query: Operators and Words.
 
 Sample query:
 
 ```clojure
 (def query ;; (solar W1 panel) W1 roof"
-  {:Token    :Op
+  {:Query    :Op
    :distance 1
-   :operands [{:Token    :Op
+   :operands [{:Query    :Op
                :distance 1
-               :operands [{:Token :Word
+               :operands [{:Query :Word
                            :word  "solar"}
-                          {:Token :Word
+                          {:Query :Word
                            :word  "panel"}]}
-              {:Token :Word
+              {:Query :Word
                :word  "roof"}]})
+```
+
+## Match
+
+The data structure for a match consists of similar types: Operators and Words.
+Additionally, it has populated indexes for matched words.
+
+```clojure
+{:Match    :Op
+ :distance 3
+ :operands [{:Match :Word
+             :word  "discloses"
+             :index 2}
+            {:Match :Word
+             :word  "fiber"
+             :index 5}]}
 ```
 
 ## Algorithm

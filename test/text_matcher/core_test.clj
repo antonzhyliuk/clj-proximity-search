@@ -14,87 +14,87 @@
    "obtained"))
 
 (def query1 ;; solar
-  {:Token :Word
+  {:Query :Word
    :word  "solar"})
 
 (def query2 ;; solar W1 panel
-  {:Token    :Op
+  {:Query    :Op
    :distance 1
-   :operands [{:Token :Word
+   :operands [{:Query :Word
                :word  "solar"}
-              {:Token :Word
+              {:Query :Word
                :word  "panel"}]})
 
 (def query3 ;; solar W2 panel
-  {:Token    :Op
+  {:Query    :Op
    :distance 2
-   :operands [{:Token :Word
+   :operands [{:Query :Word
                :word  "solar"}
-              {:Token :Word
+              {:Query :Word
                :word  "panel"}]})
 
 (def query4 ;; (solar W1 panel) W2 roof"
-  {:Token    :Op
+  {:Query    :Op
    :distance 2
-   :operands [{:Token    :Op
+   :operands [{:Query    :Op
                :distance 1
-               :operands [{:Token :Word
+               :operands [{:Query :Word
                            :word  "solar"}
-                          {:Token :Word
+                          {:Query :Word
                            :word  "panel"}]}
-              {:Token :Word
+              {:Query :Word
                :word  "roof"}]})
 
 (def query5 ;; (solar W1 panel) W1 roof"
-  {:Token    :Op
+  {:Query    :Op
    :distance 1
-   :operands [{:Token    :Op
+   :operands [{:Query    :Op
                :distance 1
-               :operands [{:Token :Word
+               :operands [{:Query :Word
                            :word  "solar"}
-                          {:Token :Word
+                          {:Query :Word
                            :word  "panel"}]}
-              {:Token :Word
+              {:Query :Word
                :word  "roof"}]})
 
 (def query6 ;; car W9 (silicon W3 material)
-  {:Token    :Op
+  {:Query    :Op
    :distance 9
-   :operands [{:Token :Word
+   :operands [{:Query :Word
                :word  "car"}
-              {:Token    :Op
+              {:Query    :Op
                :distance 3
-               :operands [{:Token :Word
+               :operands [{:Query :Word
                            :word  "silicon"}
-                          {:Token :Word
+                          {:Query :Word
                            :word  "material"}]}]})
 
 (def query7 ;; (silicon W2 material) W2 film
-  {:Token    :Op
+  {:Query    :Op
    :distance 2
-   :operands [{:Token    :Op
+   :operands [{:Query    :Op
                :distance 2
-               :operands [{:Token :Word
+               :operands [{:Query :Word
                            :word  "silicon"}
-                          {:Token :Word
+                          {:Query :Word
                            :word  "material"}]}
-              {:Token :Word
+              {:Query :Word
                :word  "film"}]})
 
 (def query8 ;; crystalline W1 (silicon W1 (film W1 is))
-  {:Token    :Op
+  {:Query    :Op
    :distance 1
-   :operands [{:Token :Word
+   :operands [{:Query :Word
                :word  "crystalline"}
-              {:Token    :Op
+              {:Query    :Op
                :distance 1
-               :operands [{:Token :Word
+               :operands [{:Query :Word
                            :word  "silicon"}
-                          {:Token    :Op
+                          {:Query    :Op
                            :distance 1
-                           :operands [{:Token :Word
+                           :operands [{:Query :Word
                                        :word  "film"}
-                                      {:Token :Word
+                                      {:Query :Word
                                        :word  "is"}]}]}]})
 
 (deftest proximity-search-test
@@ -111,13 +111,38 @@
 
 (deftest match-by-index-test
   (let [words (tokenize sample-text)]
-    (testing "Should match on word at given index and return word's index"
-      (is (= 0 (match-by-index words 0 {:Token :Word :word "The"})))
-      (is (= 1 (match-by-index words 1 {:Token :Word :word "invention"})))
-      (is (not (match-by-index words 1 {:Token :Word :word "vozhyk"}))))
+    (testing "Should match on word at given index and return match struct with index"
+      (is (= {:Match :Word
+              :word  "The"
+              :index 0}
+             (match-by-index words 0 {:Query :Word
+                                      :word "The"})))
+      (is (= {:Match :Word
+              :word  "invention"
+              :index 1}
+             (match-by-index words 1 {:Query :Word
+                                      :word "invention"})))
+      (is (not (match-by-index words 1 {:Query :Word
+                                        :word "vozhyk"}))))
 
-    (testing "Should match on operator with distance and return index of right operand"
-      (is (match-by-index words 0 {:Token :Op :distance 1 :operands [{:Token :Word :word "The"}
-                                                                     {:Token :Word :word "invention"}]}))
-      (is (= 5 (match-by-index words 2 {:Token :Op :distance 3 :operands [{:Token :Word :word "discloses"}
-                                                                          {:Token :Word :word "fiber"}]}))))))
+    (testing "Should match on operator with distance and return match struct with index"
+      (is (match-by-index words 0 {:Query   :Op
+                                   :distance 1
+                                   :operands [{:Query :Word
+                                               :word  "The"}
+                                              {:Query :Word
+                                               :word  "invention"}]}))
+      (is (= {:Match    :Op
+              :distance 3
+              :operands [{:Match :Word
+                          :word  "discloses"
+                          :index 2}
+                         {:Match :Word
+                          :word  "fiber"
+                          :index 5}]}
+             (match-by-index words 2 {:Query   :Op
+                                      :distance 3
+                                      :operands [{:Query :Word
+                                                  :word "discloses"}
+                                                 {:Query :Word
+                                                  :word "fiber"}]}))))))
