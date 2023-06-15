@@ -81,6 +81,22 @@
               {:Token :Word
                :word  "film"}]})
 
+(def query8 ;; crystalline W1 (silicon W1 (film W1 is))
+  {:Token    :Op
+   :distance 1
+   :operands [{:Token :Word
+               :word  "crystalline"}
+              {:Token    :Op
+               :distance 1
+               :operands [{:Token :Word
+                           :word  "silicon"}
+                          {:Token    :Op
+                           :distance 1
+                           :operands [{:Token :Word
+                                       :word  "film"}
+                                      {:Token :Word
+                                       :word  "is"}]}]}]})
+
 (deftest proximity-search-test
   (testing "Proximity search test"
     (is (proximity-search sample-text query1))
@@ -89,7 +105,8 @@
     (is (proximity-search sample-text query4))
     (is (not (proximity-search sample-text query5)))
     (is (proximity-search sample-text query6))
-    (is (not (proximity-search sample-text query7)))))
+    (is (not (proximity-search sample-text query7)))
+    (is (proximity-search sample-text query8))))
 
 
 (deftest match-by-index-test
