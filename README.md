@@ -35,7 +35,10 @@ Sample query:
 ## Further Exploration
 
 * Implement a parser for the queries.
-* Analyze the following article: [https://arxiv.org/abs/2009.03679](https://arxiv.org/abs/2009.03679).
+* Optimisation: 
+  1. Implement an index of words based on proximity.
+  2. Match query-tree depth first.
+  3. Execute same-depth sub-queries concurrently.
 
 
 
