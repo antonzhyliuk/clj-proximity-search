@@ -1,15 +1,47 @@
 # text-matcher
 
-This challenge is about knowing if a text is matching a given query.
+This challenge is about determining if a text matches a given query.
 
 
-## Usage
+## Query
 
-FIXME
+The data structure for a query consists of two types of tokens: Operators and Words.
+
+Sample query:
+
+```clojure
+(def query ;; (solar W1 panel) W1 roof"
+  {:Token    :Op
+   :distance 1
+   :operands [{:Token    :Op
+               :distance 1
+               :operands [{:Token :Word
+                           :word  "solar"}
+                          {:Token :Word
+                           :word  "panel"}]}
+              {:Token :Word
+               :word  "roof"}]})
+```
+
+## Algorithm
+
+1. Transform the text into a vector of words.
+2. Starting with index 0, attempt to match the top form of the query to the given index.
+3. If the query is a word, return its index.
+4. If the query is an operator, first match the left operand.
+5. If the left operand is matched, use the match's index to compute the list of right indexes to test.
+6. If any of the indexes match with the right operand, return the index of the match.
+
+## Further Exploration
+
+* Implement a parser for the queries.
+* Analyze the following article: [https://arxiv.org/abs/2009.03679](https://arxiv.org/abs/2009.03679).
+
+
 
 ## License
 
-Copyright © 2023 FIXME
+Copyright © 2023 Anton Žyluk
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at
