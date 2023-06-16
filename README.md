@@ -46,7 +46,7 @@ Additionally, it has populated indexes for matched words.
 3. If the query is a word, return its index.
 4. If the query is an operator, first match the left operand.
 5. If the left operand is matched, use the match's index to compute the list of right indexes to test.
-6. If any of the indexes match with the right operand, return the index of the match.
+6. If any of the indexes match with the right operand, return match with operands' matches.
 
 ## Further Exploration
 
