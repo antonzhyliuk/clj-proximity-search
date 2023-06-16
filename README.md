@@ -5,7 +5,7 @@ This challenge is about determining if a text matches a given query.
 
 ## Query
 
-The data structure for a query consists of two types of query: Operators and Words.
+The data structure for a query consists of two types of query: Operators and Keywords.
 
 Sample query:
 
@@ -25,8 +25,8 @@ Sample query:
 
 ## Match
 
-The data structure for a match consists of similar types: Operators and Words.
-Additionally, it has populated indexes for matched words.
+The data structure for a match consists of similar types: Operators and Keywords.
+Additionally, it has populated indexes for matched keywords.
 
 ```clojure
 {:Match    :Op
@@ -43,7 +43,7 @@ Additionally, it has populated indexes for matched words.
 
 1. Transform the text into a vector of words.
 2. Iterate over words' indexes. Try to match query on every index.
-  - If the query is a word and it's matching, return the Match struct containing the matched index.
+  - If the query is a keyword and it's matching, return the Match struct containing the matched index.
   - If the query is an operator:
     1. If the left operand matched, try to match right operand on indexes right to left operand.
     2. If right operand matched too, finish the computation and return Match struct.
