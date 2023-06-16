@@ -42,11 +42,12 @@ Additionally, it has populated indexes for matched words.
 ## Algorithm
 
 1. Transform the text into a vector of words.
-2. Starting with index 0, attempt to match the top form of the query to the given index.
-3. If the query is a word, return its index.
-4. If the query is an operator, first match the left operand.
-5. If the left operand is matched, use the match's index to compute the list of right indexes to test.
-6. If any of the indexes match with the right operand, return match with operands' matches.
+2. Iterate over words' indexes. Try to match query on every index.
+  - If the query is a word and it's matching, return the Match struct containing the matched index.
+  - If the query is an operator:
+    1. If the left operand matched, try to match right operand on indexes right to left operand.
+    2. If right operand matched too, finish the computation and return Match struct.
+
 
 ## Further Exploration
 
