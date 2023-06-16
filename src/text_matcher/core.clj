@@ -10,7 +10,7 @@
 ;;
 (defmulti right-index :Match)
 
-(defmethod right-index :Word [word]
+(defmethod right-index :Keyword [word]
   (:index word))
 
 (defmethod right-index :Op [op]
@@ -23,10 +23,10 @@
   (fn [_text _index query]
     (:Query query)))
 
-(defmethod match-by-index :Word [words index word]
+(defmethod match-by-index :Keyword [words index word]
   (when (= (get words index)
            (get word :word))
-    {:Match :Word
+    {:Match :Keyword
      :word   (get word :word)
      :index  index}))
 

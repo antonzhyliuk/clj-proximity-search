@@ -15,11 +15,11 @@ Sample query:
    :distance 1
    :operands [{:Query    :Op
                :distance 1
-               :operands [{:Query :Word
+               :operands [{:Query :Keyword
                            :word  "solar"}
-                          {:Query :Word
+                          {:Query :Keyword
                            :word  "panel"}]}
-              {:Query :Word
+              {:Query :Keyword
                :word  "roof"}]})
 ```
 
@@ -31,10 +31,10 @@ Additionally, it has populated indexes for matched words.
 ```clojure
 {:Match    :Op
  :distance 3
- :operands [{:Match :Word
+ :operands [{:Match :Keyword
              :word  "discloses"
              :index 2}
-            {:Match :Word
+            {:Match :Keyword
              :word  "fiber"
              :index 5}]}
 ```
