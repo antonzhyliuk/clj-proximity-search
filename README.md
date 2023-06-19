@@ -5,7 +5,7 @@ This challenge is about determining if a text matches a given query.
 
 ## Query
 
-The data structure for a query consists of two types of query: Operators and Keywords.
+The data structure for a query consists of two types: Operators and Keywords.
 
 Sample query:
 
