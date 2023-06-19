@@ -28,9 +28,9 @@
 
 (defmethod match-by-index :Keyword [words index kw]
   (when (= (get words index)
-           (get kw :word))
+           (:word kw))
     {:Match :Keyword
-     :word  (get kw :word)
+     :word  (:word kw)
      :index index}))
 
 (defmethod match-by-index :Op [words index operator]
@@ -40,7 +40,7 @@
       (when-let [right-match (some (fn [index]
                                      (match-by-index words index right-operand))
                                    (indexes-after (right-index left-match) distance))]
-        {:Match :Op
+        {:Match    :Op
          :distance distance
          :operands [left-match right-match]}))))
 

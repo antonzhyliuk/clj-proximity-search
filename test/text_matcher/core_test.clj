@@ -1,6 +1,10 @@
 (ns text-matcher.core-test
-  (:require [clojure.test :refer :all]
-            [text-matcher.core :refer :all]))
+  (:require [clojure.test :refer [deftest
+                                  testing
+                                  is]]
+            [text-matcher.core :refer [proximity-search
+                                       match-by-index
+                                       tokenize]]))
 
 (def sample-text
   (str
@@ -13,11 +17,13 @@
    "that a required solar panel is obtained, and the finished product of the carbon fiber solar panel car roof is"
    "obtained"))
 
-(def query1 ;; solar
+(def query1
+  ;; solar
   {:Query :Keyword
    :word  "solar"})
 
-(def query2 ;; solar W1 panel
+(def query2
+  ;; solar W1 panel
   {:Query    :Op
    :distance 1
    :operands [{:Query :Keyword
@@ -25,7 +31,8 @@
               {:Query :Keyword
                :word  "panel"}]})
 
-(def query3 ;; solar W2 panel
+(def query3
+  ;; solar W2 panel
   {:Query    :Op
    :distance 2
    :operands [{:Query :Keyword
@@ -33,7 +40,8 @@
               {:Query :Keyword
                :word  "panel"}]})
 
-(def query4 ;; (solar W1 panel) W2 roof"
+(def query4
+  ;; (solar W1 panel) W2 roof"
   {:Query    :Op
    :distance 2
    :operands [{:Query    :Op
@@ -45,7 +53,8 @@
               {:Query :Keyword
                :word  "roof"}]})
 
-(def query5 ;; (solar W1 panel) W1 roof"
+(def query5
+  ;; (solar W1 panel) W1 roof"
   {:Query    :Op
    :distance 1
    :operands [{:Query    :Op
@@ -57,7 +66,8 @@
               {:Query :Keyword
                :word  "roof"}]})
 
-(def query6 ;; car W9 (silicon W3 material)
+(def query6
+  ;; car W9 (silicon W3 material)
   {:Query    :Op
    :distance 9
    :operands [{:Query :Keyword
@@ -69,7 +79,8 @@
                           {:Query :Keyword
                            :word  "material"}]}]})
 
-(def query7 ;; (silicon W2 material) W2 film
+(def query7
+  ;; (silicon W2 material) W2 film
   {:Query    :Op
    :distance 2
    :operands [{:Query    :Op
@@ -81,7 +92,8 @@
               {:Query :Keyword
                :word  "film"}]})
 
-(def query8 ;; crystalline W1 (silicon W1 (film W1 is))
+(def query8
+  ;; crystalline W1 (silicon W1 (film W1 is))
   {:Query    :Op
    :distance 1
    :operands [{:Query :Keyword
@@ -116,14 +128,14 @@
               :word  "The"
               :index 0}
              (match-by-index words 0 {:Query :Keyword
-                                      :word "The"})))
+                                      :word  "The"})))
       (is (= {:Match :Keyword
               :word  "invention"
               :index 1}
              (match-by-index words 1 {:Query :Keyword
-                                      :word "invention"})))
+                                      :word  "invention"})))
       (is (not (match-by-index words 1 {:Query :Keyword
-                                        :word "vozhyk"}))))
+                                        :word  "non-existing-word"}))))
 
     (testing "Should match on operator with distance and return match struct with index"
       (is (match-by-index words 0 {:Query   :Op
@@ -140,9 +152,9 @@
                          {:Match :Keyword
                           :word  "fiber"
                           :index 5}]}
-             (match-by-index words 2 {:Query   :Op
+             (match-by-index words 2 {:Query    :Op
                                       :distance 3
                                       :operands [{:Query :Keyword
-                                                  :word "discloses"}
+                                                  :word  "discloses"}
                                                  {:Query :Keyword
-                                                  :word "fiber"}]}))))))
+                                                  :word  "fiber"}]}))))))
