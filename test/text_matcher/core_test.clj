@@ -3,7 +3,7 @@
                                   testing
                                   is]]
             [text-matcher.core :refer [proximity-search
-                                       match-by-index
+                                       match-index
                                        tokenize]]))
 
 (def sample-text
@@ -24,7 +24,7 @@
 
 (def query2
   ;; solar W1 panel
-  {:Query    :Op
+  {:Query    :Within
    :distance 1
    :operands [{:Query :Keyword
                :word  "solar"}
@@ -33,7 +33,7 @@
 
 (def query3
   ;; solar W2 panel
-  {:Query    :Op
+  {:Query    :Within
    :distance 2
    :operands [{:Query :Keyword
                :word  "solar"}
@@ -42,9 +42,9 @@
 
 (def query4
   ;; (solar W1 panel) W2 roof"
-  {:Query    :Op
+  {:Query    :Within
    :distance 2
-   :operands [{:Query    :Op
+   :operands [{:Query    :Within
                :distance 1
                :operands [{:Query :Keyword
                            :word  "solar"}
@@ -55,9 +55,9 @@
 
 (def query5
   ;; (solar W1 panel) W1 roof"
-  {:Query    :Op
+  {:Query    :Within
    :distance 1
-   :operands [{:Query    :Op
+   :operands [{:Query    :Within
                :distance 1
                :operands [{:Query :Keyword
                            :word  "solar"}
@@ -68,11 +68,11 @@
 
 (def query6
   ;; car W9 (silicon W3 material)
-  {:Query    :Op
+  {:Query    :Within
    :distance 9
    :operands [{:Query :Keyword
                :word  "car"}
-              {:Query    :Op
+              {:Query    :Within
                :distance 3
                :operands [{:Query :Keyword
                            :word  "silicon"}
@@ -81,9 +81,9 @@
 
 (def query7
   ;; (silicon W2 material) W2 film
-  {:Query    :Op
+  {:Query    :Within
    :distance 2
-   :operands [{:Query    :Op
+   :operands [{:Query    :Within
                :distance 2
                :operands [{:Query :Keyword
                            :word  "silicon"}
@@ -94,51 +94,65 @@
 
 (def query8
   ;; crystalline W1 (silicon W1 (film W1 is))
-  {:Query    :Op
+  {:Query    :Within
    :distance 1
-   :operands [{:Query :Keyword
+   :operands [{:Query :Keyword 
                :word  "crystalline"}
-              {:Query    :Op
+              {:Query    :Within
                :distance 1
                :operands [{:Query :Keyword
                            :word  "silicon"}
-                          {:Query    :Op
+                          {:Query    :Within
                            :distance 1
                            :operands [{:Query :Keyword
                                        :word  "film"}
                                       {:Query :Keyword
                                        :word  "is"}]}]}]})
 
+(def query9
+  ;; (carbon W2 car) N2 required
+  {:Query    :Near
+   :distance 2
+   :operands [{:Query    :Within
+               :distance 2
+               :operands [{:Query :Keyword
+                           :word  "carbon"}
+                          {:Query :Keyword
+                           :word  "car"}]}
+              {:Query :Keyword
+               :word  "required"}]})
+
 (deftest proximity-search-test
   (testing "Proximity search test"
     (is (proximity-search sample-text query1))
     (is (proximity-search sample-text query2))
     (is (proximity-search sample-text query3))
-    (is (proximity-search sample-text query4))
+    (is (proximity-search sample-text query4)) 
     (is (not (proximity-search sample-text query5)))
     (is (proximity-search sample-text query6))
     (is (not (proximity-search sample-text query7)))
-    (is (proximity-search sample-text query8))))
+    (is (proximity-search sample-text query8))
+    (is (proximity-search sample-text query9))))
 
 
-(deftest match-by-index-test
+(deftest match-index-test
   (let [words (tokenize sample-text)]
     (testing "Should match on word at given index and return match struct with index"
       (is (= {:Match :Keyword
               :word  "The"
               :index 0}
-             (match-by-index words 0 {:Query :Keyword
+             (match-index words 0 {:Query :Keyword
                                       :word  "The"})))
       (is (= {:Match :Keyword
               :word  "invention"
               :index 1}
-             (match-by-index words 1 {:Query :Keyword
+             (match-index words 1 {:Query :Keyword
                                       :word  "invention"})))
-      (is (not (match-by-index words 1 {:Query :Keyword
+      (is (not (match-index words 1 {:Query :Keyword
                                         :word  "non-existing-word"}))))
 
     (testing "Should match on operator with distance and return match struct with index"
-      (is (match-by-index words 0 {:Query   :Op
+      (is (match-index words 0 {:Query   :Within
                                    :distance 1
                                    :operands [{:Query :Keyword
                                                :word  "The"}
@@ -152,7 +166,7 @@
                          {:Match :Keyword
                           :word  "fiber"
                           :index 5}]}
-             (match-by-index words 2 {:Query    :Op
+             (match-index words 2 {:Query    :Within
                                       :distance 3
                                       :operands [{:Query :Keyword
                                                   :word  "discloses"}
