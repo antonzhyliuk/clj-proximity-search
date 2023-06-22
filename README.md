@@ -2,6 +2,12 @@
 
 Implementation of [proximity search (text)](https://en.wikipedia.org/wiki/Proximity_search_(text)) algorithm with operators "N(distance)" and "W(distance)" in clojure.
 
+## Usage
+[Clojars](https://clojars.org/org.clojars.antonzhyliuk/clj-proximity-search/versions/0.1.0)
+
+Lein: `[org.clojars.antonzhyliuk/clj-proximity-search "0.1.0"]`
+
+
 
 ## Query
 
