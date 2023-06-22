@@ -1,4 +1,4 @@
-(ns text-matcher.core)
+(ns clj-proximity-search.core)
 
 ;;; Indexes computation
 

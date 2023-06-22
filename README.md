@@ -1,6 +1,6 @@
-# Proximity-search
+# clj-proximity-search
 
-Implementation of 
+Implementation of [proximity search (text)](https://en.wikipedia.org/wiki/Proximity_search_(text)) algorithm with operators "N(distance)" and "W(distance)" in clojure.
 
 
 ## Query
@@ -43,11 +43,11 @@ Additionally, it has populated indexes for matched keywords.
 
 ## Algorithm
 
-1. Iterate over words' indexes. Try to match query on every index.
-  - If the query is a keyword and it's matching, return the Match struct containing the matched index.
-  - If the query is an operator:
-    1. If the left operand matched, try to match right operand at indexes where right operand could be found.
-    2. If right operand matched too, finish the computation and return Match struct.
+1. Iterate over words' indexes. Try to match the query on every index.
+2. If the query is a keyword and it's matching, return the Match struct containing the matched index.
+3. If the query is an operator:
+   1. If the left operand matches, try to match the right operand at indexes where the right operand could be found.
+   2. If the right operand matched too, finish the computation and return the Match struct.
 
 ## Further Exploration
 

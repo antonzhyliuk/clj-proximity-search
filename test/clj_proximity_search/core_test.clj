@@ -1,8 +1,8 @@
-(ns text-matcher.core-test
+(ns clj-proximity-search.core-test
   (:require [clojure.test :refer [deftest
                                   testing
                                   is]]
-            [text-matcher.core :refer [proximity-search
+            [clj-proximity-search.core :refer [proximity-search
                                        match-query]]
             [clojure.string :as str]))
 
@@ -168,7 +168,9 @@
     (is (not (proximity-search tokens query7)))
     (is (proximity-search tokens query8))
     (is (proximity-search tokens query9))
-    (is (proximity-search tokens query10))))
+    (is (proximity-search tokens query10)))
+  (testing "Should not match on empty vec"
+    (is (not (proximity-search [] query1)))))
 
 
 (deftest match-query-test
