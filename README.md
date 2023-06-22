@@ -1,6 +1,6 @@
-# text-matcher
+# Proximity-search
 
-This challenge is about determining if a text matches a given query.
+Implementation of 
 
 
 ## Query
@@ -10,10 +10,12 @@ The data structure for a query consists of two types: Operators and Keywords.
 Sample query:
 
 ```clojure
-(def query ;; (solar W1 panel) W1 roof"
+(def query ;; (solar W1 panel) N1 roof"
   {:Query    :Op
+   :operator :near
    :distance 1
    :operands [{:Query    :Op
+               :operator :within
                :distance 1
                :operands [{:Query :Keyword
                            :word  "solar"}
@@ -41,23 +43,15 @@ Additionally, it has populated indexes for matched keywords.
 
 ## Algorithm
 
-1. Transform the text into a vector of words.
-2. Iterate over words' indexes. Try to match query on every index.
+1. Iterate over words' indexes. Try to match query on every index.
   - If the query is a keyword and it's matching, return the Match struct containing the matched index.
   - If the query is an operator:
-    1. If the left operand matched, try to match right operand on indexes right to left operand.
+    1. If the left operand matched, try to match right operand at indexes where right operand could be found.
     2. If right operand matched too, finish the computation and return Match struct.
-
 
 ## Further Exploration
 
 * Implement a parser for the queries.
-* Optimisation: 
-  1. Implement an index of words based on proximity.
-  2. Match query-tree depth first.
-  3. Execute same-depth sub-queries concurrently.
-
-
 
 ## License
 

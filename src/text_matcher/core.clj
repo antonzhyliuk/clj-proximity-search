@@ -1,9 +1,6 @@
-(ns text-matcher.core
-  (:require
-   [clojure.string :as str]))
+(ns text-matcher.core)
 
-(defn tokenize [text]
-  (vec (str/split text #" ")))
+;;; Indexes computation
 
 (defn indexes-left [index distance]
   (range (- index distance)
@@ -15,55 +12,48 @@
 
 ;;; Right index for Match structures
 
-(defmulti get-index :Match)
+(defmulti get-match-index :Match)
 
-(defmethod get-index :Keyword [kw _direction]
+(defmethod get-match-index :Keyword [kw _direction]
   (:index kw))
 
-(defmethod get-index :Op [op direction]
-  (let [[left right] (:operands op)]
+(defmethod get-match-index :Op [op direction]
+  (let [{[left right] :operands} op]
     (condp = direction
-      :right (get-index right direction)
-      :left  (get-index left direction))))
+      :right (get-match-index right direction)
+      :left  (get-match-index left direction))))
 
-;;; Match by index for Query structures
+;;; Match tokens vector with index Query structures
 
-(defmulti match-index
+(defmulti match-query
   (fn [_text _index query]
     (:Query query)))
 
-(defmethod match-index :Keyword [words index kw]
-  (when (= (get words index)
-           (:word kw))
-    {:Match :Keyword
-     :word  (:word kw)
-     :index index}))
+(defmethod match-query :Keyword [tokens index kw]
+  (let [token (:token kw)]
+    (when (= token (get tokens index))
+      {:Match :Keyword
+       :token token
+       :index index})))
 
-(defmethod match-index :Within [words index operator]
-  (let [[left-operand right-operand] (:operands operator)
-        distance                     (:distance operator)]
-    (when-let [left-match (match-index words index left-operand)]
-      (when-let [right-match (some (fn [index]
-                                     (match-index words index right-operand))
-                                   (indexes-right (get-index left-match :right) distance))]
-        {:Match    :Op
-         :distance distance
-         :operands [left-match right-match]}))))
+(defmethod match-query :Op [tokens index op]
+  (let [{[left-operand right-operand] :operands
+         :keys [operator distance]} op]
+    (when-let [left-match (match-query tokens index left-operand)]
+      (let [possible-right-match-indexes (condp = operator
+                                           :within (indexes-right (get-match-index left-match :right) distance)
+                                           :near (concat (indexes-right (get-match-index left-match :right) distance)
+                                                         (indexes-left (get-match-index left-match :left) distance)))]
+        (when-let [right-match (some (fn [index]
+                                       (match-query tokens index right-operand))
+                                     possible-right-match-indexes)]
+          {:Match    :Op
+           :distance distance
+           :operands [left-match right-match]})))))
 
-(defmethod match-index :Near [words index operator]
-  (let [[left-operand right-operand] (:operands operator)
-        distance                     (:distance operator)]
-    (when-let [left-match (match-index words index left-operand)] 
-      (when-let [right-match (some (fn [index]
-                                     (match-index words index right-operand))
-                                   (concat (indexes-right (get-index left-match :right) distance)
-                                           (indexes-left (get-index left-match :left) distance)))]
-        {:Match    :Op
-         :distance distance
-         :operands [left-match right-match]}))))
+;;; Top level function
 
-(defn proximity-search [text query]
-  (let [words (tokenize text)]
-    (some (fn [index]
-            (match-index words index query))
-          (range (count words)))))
+(defn proximity-search [tokens query] 
+  (some (fn [index]
+          (match-query tokens index query))
+        (range (count tokens))))

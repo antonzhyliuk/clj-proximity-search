@@ -3,8 +3,11 @@
                                   testing
                                   is]]
             [text-matcher.core :refer [proximity-search
-                                       match-index
-                                       tokenize]]))
+                                       match-query]]
+            [clojure.string :as str]))
+
+(defn tokenize [text]
+  (vec (str/split text #" ")))
 
 (def sample-text
   (str
@@ -17,158 +20,192 @@
    "that a required solar panel is obtained, and the finished product of the carbon fiber solar panel car roof is"
    "obtained"))
 
+(def tokens (tokenize sample-text))
+
 (def query1
   ;; solar
   {:Query :Keyword
-   :word  "solar"})
+   :token "solar"})
 
 (def query2
   ;; solar W1 panel
-  {:Query    :Within
+  {:Query    :Op
+   :operator :within
    :distance 1
    :operands [{:Query :Keyword
-               :word  "solar"}
+               :token "solar"}
               {:Query :Keyword
-               :word  "panel"}]})
+               :token "panel"}]})
 
 (def query3
   ;; solar W2 panel
-  {:Query    :Within
+  {:Query    :Op
+   :operator :within
    :distance 2
    :operands [{:Query :Keyword
-               :word  "solar"}
+               :token "solar"}
               {:Query :Keyword
-               :word  "panel"}]})
+               :token "panel"}]})
 
 (def query4
   ;; (solar W1 panel) W2 roof"
-  {:Query    :Within
+  {:Query    :Op
+   :operator :within
    :distance 2
-   :operands [{:Query    :Within
+   :operands [{:Query    :Op
+               :operator :within
                :distance 1
                :operands [{:Query :Keyword
-                           :word  "solar"}
+                           :token "solar"}
                           {:Query :Keyword
-                           :word  "panel"}]}
+                           :token "panel"}]}
               {:Query :Keyword
-               :word  "roof"}]})
+               :token "roof"}]})
 
 (def query5
   ;; (solar W1 panel) W1 roof"
-  {:Query    :Within
+  {:Query    :Op
+   :operator :within
    :distance 1
-   :operands [{:Query    :Within
+   :operands [{:Query    :Op
+               :operator :within
                :distance 1
                :operands [{:Query :Keyword
-                           :word  "solar"}
+                           :token "solar"}
                           {:Query :Keyword
-                           :word  "panel"}]}
+                           :token "panel"}]}
               {:Query :Keyword
-               :word  "roof"}]})
+               :token "roof"}]})
 
 (def query6
   ;; car W9 (silicon W3 material)
-  {:Query    :Within
+  {:Query    :Op
+   :operator :within
    :distance 9
    :operands [{:Query :Keyword
-               :word  "car"}
-              {:Query    :Within
+               :token "car"}
+              {:Query    :Op
+               :operator :within
                :distance 3
                :operands [{:Query :Keyword
-                           :word  "silicon"}
+                           :token "silicon"}
                           {:Query :Keyword
-                           :word  "material"}]}]})
+                           :token "material"}]}]})
 
 (def query7
   ;; (silicon W2 material) W2 film
-  {:Query    :Within
+  {:Query    :Op
+   :operator :within
    :distance 2
-   :operands [{:Query    :Within
+   :operands [{:Query    :Op
+               :operator :within
                :distance 2
                :operands [{:Query :Keyword
-                           :word  "silicon"}
+                           :token "silicon"}
                           {:Query :Keyword
-                           :word  "material"}]}
+                           :token "material"}]}
               {:Query :Keyword
-               :word  "film"}]})
+               :token "film"}]})
 
 (def query8
   ;; crystalline W1 (silicon W1 (film W1 is))
-  {:Query    :Within
+  {:Query    :Op
+   :operator :within
    :distance 1
-   :operands [{:Query :Keyword 
-               :word  "crystalline"}
-              {:Query    :Within
+   :operands [{:Query :Keyword
+               :token "crystalline"}
+              {:Query    :Op
+               :operator :within
                :distance 1
                :operands [{:Query :Keyword
-                           :word  "silicon"}
-                          {:Query    :Within
+                           :token "silicon"}
+                          {:Query    :Op
+                           :operator :within
                            :distance 1
                            :operands [{:Query :Keyword
-                                       :word  "film"}
+                                       :token "film"}
                                       {:Query :Keyword
-                                       :word  "is"}]}]}]})
+                                       :token "is"}]}]}]})
 
 (def query9
   ;; (carbon W2 car) N2 required
-  {:Query    :Near
+  {:Query    :Op
+   :operator :near
    :distance 2
-   :operands [{:Query    :Within
+   :operands [{:Query    :Op
+               :operator :within
                :distance 2
                :operands [{:Query :Keyword
-                           :word  "carbon"}
+                           :token "carbon"}
                           {:Query :Keyword
-                           :word  "car"}]}
+                           :token "car"}]}
               {:Query :Keyword
-               :word  "required"}]})
+               :token "required"}]})
+
+(def query10
+  ;; (carbon N3 product) N2 the
+  {:Query    :Op
+   :operator :near
+   :distance 2
+   :operands [{:Query    :Op
+               :operator :near
+               :distance 3
+               :operands [{:Query :Keyword
+                           :token "carbon"}
+                          {:Query :Keyword
+                           :token "product"}]}
+              {:Query :Keyword
+               :token "the"}]})
 
 (deftest proximity-search-test
   (testing "Proximity search test"
-    (is (proximity-search sample-text query1))
-    (is (proximity-search sample-text query2))
-    (is (proximity-search sample-text query3))
-    (is (proximity-search sample-text query4)) 
-    (is (not (proximity-search sample-text query5)))
-    (is (proximity-search sample-text query6))
-    (is (not (proximity-search sample-text query7)))
-    (is (proximity-search sample-text query8))
-    (is (proximity-search sample-text query9))))
+    (is (proximity-search tokens query1))
+    (is (proximity-search tokens query2))
+    (is (proximity-search tokens query3))
+    (is (proximity-search tokens query4))
+    (is (not (proximity-search tokens query5)))
+    (is (proximity-search tokens query6))
+    (is (not (proximity-search tokens query7)))
+    (is (proximity-search tokens query8))
+    (is (proximity-search tokens query9))
+    (is (proximity-search tokens query10))))
 
 
-(deftest match-index-test
-  (let [words (tokenize sample-text)]
-    (testing "Should match on word at given index and return match struct with index"
-      (is (= {:Match :Keyword
-              :word  "The"
-              :index 0}
-             (match-index words 0 {:Query :Keyword
-                                      :word  "The"})))
-      (is (= {:Match :Keyword
-              :word  "invention"
-              :index 1}
-             (match-index words 1 {:Query :Keyword
-                                      :word  "invention"})))
-      (is (not (match-index words 1 {:Query :Keyword
-                                        :word  "non-existing-word"}))))
+(deftest match-query-test
+  (testing "Should match on word at given index and return match struct with index"
+    (is (= {:Match :Keyword
+            :token "The"
+            :index 0}
+           (match-query tokens 0 {:Query :Keyword
+                                  :token "The"})))
+    (is (= {:Match :Keyword
+            :token  "invention"
+            :index 1}
+           (match-query tokens 1 {:Query :Keyword
+                                  :token "invention"})))
+    (is (not (match-query tokens 1 {:Query :Keyword
+                                    :token "non-existing-word"}))))
 
-    (testing "Should match on operator with distance and return match struct with index"
-      (is (match-index words 0 {:Query   :Within
-                                   :distance 1
-                                   :operands [{:Query :Keyword
-                                               :word  "The"}
-                                              {:Query :Keyword
-                                               :word  "invention"}]}))
-      (is (= {:Match    :Op
-              :distance 3
-              :operands [{:Match :Keyword
-                          :word  "discloses"
-                          :index 2}
-                         {:Match :Keyword
-                          :word  "fiber"
-                          :index 5}]}
-             (match-index words 2 {:Query    :Within
-                                      :distance 3
-                                      :operands [{:Query :Keyword
-                                                  :word  "discloses"}
-                                                 {:Query :Keyword
-                                                  :word  "fiber"}]}))))))
+  (testing "Should match on operator with distance and return match struct with index"
+    (is (match-query tokens 0 {:Query    :Op
+                               :operator :within
+                               :distance 1
+                               :operands [{:Query :Keyword
+                                           :token "The"}
+                                          {:Query :Keyword
+                                           :token "invention"}]}))
+    (is (= {:Match    :Op
+            :distance 3
+            :operands [{:Match :Keyword
+                        :token "discloses"
+                        :index 2}
+                       {:Match :Keyword
+                        :token "fiber"
+                        :index 5}]}
+           (match-query tokens 2 {:Query    :Op
+                                  :operator :within
+                                  :distance 3
+                                  :operands [{:Query :Keyword
+                                              :token "discloses"}
+                                             {:Query :Keyword
+                                              :token "fiber"}]})))))
